@@ -4,7 +4,7 @@ Multi-lab Cognito playground for AWS CLI abuse and auth misconfiguration. The ap
 This lab uses [Floci](https://floci.io/#quickstart) to emulate AWS Cognito and AWS services.
 
 ```bash
-docker run --rm -p 4566:4566 floci/floci:latest
+docker run -d -p 4566:4566 --name floci-aws floci/floci
 ```
 
 It is recommended to use a virtual environment:
