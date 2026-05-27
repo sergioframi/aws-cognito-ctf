@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 20px;">
+    <h2 style="margin-top: 0; font-family: 'Space Grotesk', sans-serif;">Lab 3 - Auth Flow Variation</h2>
+    <p style="color: var(--muted);">El flujo principal es USER_SRP_AUTH, pero el backend acepta USER_PASSWORD_AUTH.</p>
+</div>
+
+<div class="grid" style="margin-bottom: 20px;">
+    <div class="card">
+        <h3>Client ID</h3>
+        <p><strong>Client ID:</strong> {{ client_id }}</p>
+        <p><strong>Usuario conocido:</strong> {{ known_user }}</p>
+        <p><strong>Password:</strong> {{ known_password }}</p>
+    </div>
+    <div class="card">
+        <h3>Resultado</h3>
+        {% if show_flag %}
+        <div class="pill good">Flag obtenida</div>
+        <p style="margin-top: 12px;"><strong>Flag:</strong> {{ flag }}</p>
+        {% else %}
+        <div class="pill">Pendiente</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <h3>Login</h3>
+    <form method="POST" action="/lab3/login" class="form-row" id="lab3-login-form">
+        <input type="hidden" name="auth_flow" value="USER_SRP_AUTH">
+        <label for="lab3-user">Username</label>
+        <input id="lab3-user" name="username" required>
+        <label for="lab3-pass">Password</label>
+        <input id="lab3-pass" type="password" name="password" required>
+        <button class="btn secondary" type="submit">Login</button>
+    </form>
+    {% if srp_message %}
+    <div style="margin-top: 12px; color: var(--muted);">{{ srp_message }}</div>
+    {% endif %}
+    <p style="margin-top: 12px; color: var(--muted);">Tip: intercepta la peticion y cambia <code>auth_flow</code> a <code>USER_PASSWORD_AUTH</code> con la password en claro.</p>
+</div>
+
+<script>
+    async function sha256Hex(value) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(value);
+        const hash = await crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(hash))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+    }
+
+    document.getElementById("lab3-login-form").addEventListener("submit", async (event) => {
+        const authFlow = document.querySelector("input[name='auth_flow']").value;
+        if (authFlow !== "USER_SRP_AUTH") {
+            return;
+        }
+        event.preventDefault();
+        const username = document.getElementById("lab3-user").value;
+        const passwordField = document.getElementById("lab3-pass");
+        const salt = "{{ srp_salt }}";
+        const checksum = await sha256Hex(`${username}:${passwordField.value}:${salt}`);
+        passwordField.value = checksum;
+        event.target.submit();
+    });
+</script>
+{% endblock %}

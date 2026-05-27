@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 20px;">
+    <h2 style="margin-top: 0; font-family: 'Space Grotesk', sans-serif;">Lab 4 - Register</h2>
+    <p style="color: var(--muted);">Crea un usuario y asigna tenant.</p>
+</div>
+
+<div class="card">
+    {% if success %}
+    <div class="pill good">Registro exitoso</div>
+    <p style="margin-top: 12px;">Tu cuenta fue creada. Puedes volver al gateway.</p>
+    <a class="btn" href="/lab4">Volver</a>
+    {% else %}
+    <h3>Registro</h3>
+    <form method="POST" class="form-row">
+        <label for="lab4-reg-user">Username</label>
+        <input id="lab4-reg-user" name="username" required>
+        <label for="lab4-reg-pass">Password</label>
+        <input id="lab4-reg-pass" name="password" required>
+        <label for="lab4-reg-email">Email</label>
+        <input id="lab4-reg-email" type="email" name="email" required>
+        <label for="lab4-reg-tenant">Tenant</label>
+        <select id="lab4-reg-tenant" name="tenant">
+            {% for tenant in tenants %}
+            <option value="{{ tenant }}">{{ tenant }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn secondary" type="submit">Crear</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

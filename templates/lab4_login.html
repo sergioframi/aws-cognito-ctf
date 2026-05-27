@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 20px;">
+    <h2 style="margin-top: 0; font-family: 'Space Grotesk', sans-serif;">Lab 4 - Login {{ tenant_name }}</h2>
+    <p style="color: var(--muted);">Autenticacion centralizada por Cognito.</p>
+</div>
+
+<div class="card">
+    <h3>Login</h3>
+    <form method="POST" class="form-row">
+        <label for="lab4-user">Username</label>
+        <input id="lab4-user" name="username" required>
+        <label for="lab4-pass">Password</label>
+        <input id="lab4-pass" type="password" name="password" required>
+        <button class="btn" type="submit">Login</button>
+    </form>
+    <p style="margin-top: 12px; color: var(--muted);">Usuarios preconfigurados: admin / 123, user / 123 (tenant ACME_1).</p>
+</div>
+{% endblock %}

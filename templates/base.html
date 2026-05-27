@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title or "Cognito Labs" }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-1: #f7f3ef;
+            --bg-2: #eef6ff;
+            --ink: #1e2330;
+            --muted: #5a657a;
+            --accent: #f46d43;
+            --accent-2: #1a7f86;
+            --card: #ffffff;
+            --border: #e6e0da;
+            --shadow: 0 20px 60px rgba(30, 35, 48, 0.12);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "IBM Plex Sans", sans-serif;
+            color: var(--ink);
+            background: radial-gradient(circle at top left, var(--bg-2), var(--bg-1));
+            min-height: 100vh;
+        }
+        header {
+            padding: 24px 32px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+        }
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            margin-right: 12px;
+            font-weight: 600;
+        }
+        nav a:last-child { margin-right: 0; }
+        .shell {
+            max-width: 1080px;
+            margin: 0 auto 48px;
+            padding: 0 24px 48px;
+        }
+        .banner {
+            background: #fff1f0;
+            border: 1px solid #f5b1a8;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #f3f4f7;
+            color: var(--muted);
+        }
+        .pill.good { background: #e5f7ed; color: #18794e; }
+        .pill.bad { background: #fde8e8; color: #b91c1c; }
+        .badge-user { background: #e8edf5; color: #1f3b65; }
+        .badge-admin { background: #ffe8e8; color: #8b1c1c; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            color: #fff;
+            background: var(--accent);
+        }
+        .btn.secondary { background: var(--accent-2); }
+        .btn.ghost {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+        .form-row { display: grid; gap: 10px; }
+        label { font-weight: 600; }
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            font-family: inherit;
+        }
+        .alert {
+            background: #fde8e8;
+            border: 1px solid #f6b4b4;
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        code, pre {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        }
+        pre {
+            background: #1f2937;
+            color: #f8fafc;
+            padding: 12px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+        @media (max-width: 720px) {
+            header { padding: 20px; }
+            nav { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Cognito Labs</h1>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/lab1">Lab 1</a>
+            <a href="/lab2">Lab 2</a>
+            <a href="/lab3">Lab 3</a>
+            <a href="/lab4">Lab 4</a>
+        </nav>
+    </header>
+    <div class="shell">
+        {% if floci_warning %}
+        <div class="banner">{{ floci_warning }}</div>
+        {% endif %}
+        {% if err %}
+        <div class="alert">{{ err }}</div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

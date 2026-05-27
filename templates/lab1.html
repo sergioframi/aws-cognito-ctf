@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 20px;">
+    <h2 style="margin-top: 0; font-family: 'Space Grotesk', sans-serif;">Lab 1 - Guest Identity Pool</h2>
+    <p style="color: var(--muted);">Floci no soporta cognito-identity, asi que este lab emula la CLI en la web. Copia el comando, pegalo en el formulario y valida la salida.</p>
+</div>
+
+
+<div class="grid" style="margin-bottom: 20px;">
+    <div class="card">
+        <h3>Identity Pool</h3>
+        <p><strong>ID:</strong> {{ identity_pool_id }}</p>
+        <p><strong>Region:</strong> {{ region }}</p>
+        <p><strong>Endpoint:</strong> {{ endpoint_url }}</p>
+    </div>
+    <div class="card">
+        <h3>Target S3</h3>
+        <p>Lista buckets y busca el que contiene la flag.</p>
+        <p><strong>Bucket hint:</strong> {{ bucket_name }}</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 20px;">
+    <h3>CLI Simulator</h3>
+    <div class="form-row">
+        <label for="lab1-get-id">Step 1: get-id</label>
+        <input id="lab1-get-id" value="aws cognito-identity get-id --identity-pool-id {{ identity_pool_id }} --endpoint-url {{ endpoint_url }} --region {{ region }}">
+        <button class="btn" type="button" id="lab1-get-id-btn">Run get-id</button>
+        <pre id="lab1-get-id-output">{}</pre>
+    </div>
+</div>
+
+<div class="card">
+    <div class="form-row">
+        <label for="lab1-get-creds">Step 2: get-credentials-for-identity</label>
+        <input id="lab1-get-creds" placeholder="aws cognito-identity get-credentials-for-identity --identity-id us-east-1:... --endpoint-url {{ endpoint_url }} --region {{ region }}">
+        <button class="btn secondary" type="button" id="lab1-get-creds-btn">Run get-credentials</button>
+        <pre id="lab1-get-creds-output">{}</pre>
+    </div>
+</div>
+
+<script>
+    function renderOutput(targetId, payload) {
+        const node = document.getElementById(targetId);
+        node.textContent = JSON.stringify(payload, null, 2);
+    }
+
+    document.getElementById("lab1-get-id-btn").addEventListener("click", async () => {
+        const command = document.getElementById("lab1-get-id").value;
+        const form = new URLSearchParams();
+        form.set("command", command);
+        const response = await fetch("/lab1/cli/get-id", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: form.toString(),
+        });
+        const data = await response.json();
+        renderOutput("lab1-get-id-output", data);
+        if (data && data.IdentityId) {
+            document.getElementById("lab1-get-creds").value =
+                `aws cognito-identity get-credentials-for-identity --identity-id ${data.IdentityId} --endpoint-url {{ endpoint_url }} --region {{ region }}`;
+        }
+    });
+
+    document.getElementById("lab1-get-creds-btn").addEventListener("click", async () => {
+        const command = document.getElementById("lab1-get-creds").value;
+        const form = new URLSearchParams();
+        form.set("command", command);
+        const response = await fetch("/lab1/cli/get-credentials", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: form.toString(),
+        });
+        const data = await response.json();
+        renderOutput("lab1-get-creds-output", data);
+    });
+</script>
+{% endblock %}

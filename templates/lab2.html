@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 20px;">
+    <h2 style="margin-top: 0; font-family: 'Space Grotesk', sans-serif;">Lab 2 - Self Sign-Up Abuse</h2>
+    <p style="color: var(--muted);">La UI no permite registrar usuarios, pero el Client ID esta expuesto.</p>
+</div>
+
+<div class="grid" style="margin-bottom: 20px;">
+    <div class="card">
+        <h3>Client ID expuesto</h3>
+        <p><strong>Client ID:</strong> {{ client_id }}</p>
+        <pre>aws cognito-idp sign-up \
+  --client-id {{ client_id }} \
+  --username demo-user \
+  --password 'Password123!' \
+  --user-attributes Name=email,Value=demo-user@example.com \
+  --endpoint-url http://localhost:4566 \
+  --region us-east-1</pre>
+    </div>
+    <div class="card">
+        <h3>Login web</h3>
+        <p>Si el login es valido, aparece la flag del lab.</p>
+        <p style="color: var(--muted);">Fallback: el sistema auto-confirma el usuario en el primer login si Floci no soporta triggers.</p>
+        {% if show_flag %}
+        <div class="pill good">Flag obtenida</div>
+        <p style="margin-top: 12px;"><strong>Flag:</strong> {{ flag }}</p>
+        {% else %}
+        <div class="pill">Pendiente</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <h3>Login</h3>
+    <form method="POST" action="/lab2/login" class="form-row">
+        <label for="lab2-user">Username</label>
+        <input id="lab2-user" name="username" required>
+        <label for="lab2-pass">Password</label>
+        <input id="lab2-pass" type="password" name="password" required>
+        <button class="btn" type="submit">Login</button>
+    </form>
+</div>
+{% endblock %}

